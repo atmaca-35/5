@@ -96,10 +96,7 @@ main {
   line-height: 1.6;
   white-space: pre-line;
   color: #f0f0f0;
-  overflow: hidden;
-  overflow-wrap: break-word; 
-  max-height: 400px; /* Or adjust as needed */
-  overflow-y: auto; /* Add vertical scrollbar if content overflows */
+  
 }
 
 .result .highlight {
