@@ -96,9 +96,10 @@ main {
   line-height: 1.6;
   white-space: pre-line;
   color: #f0f0f0;
-  overflow: hidden; 
-  text-overflow: ellipsis;
-  overflow-wrap: break-word; /* Allow long words to break and wrap to the next line */
+  overflow: hidden;
+  overflow-wrap: break-word; 
+  max-height: 400px; /* Or adjust as needed */
+  overflow-y: auto; /* Add vertical scrollbar if content overflows */
 }
 
 .result .highlight {
