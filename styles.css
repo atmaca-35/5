@@ -96,6 +96,9 @@ main {
   line-height: 1.6;
   white-space: pre-line;
   color: #f0f0f0;
+  overflow: hidden; /* Prevent content from overflowing */
+  text-overflow: ellipsis; /* Add ellipsis (...) if content overflows */
+  white-space: nowrap; /* Prevent text from wrapping */
 }
 
 .result .highlight {
