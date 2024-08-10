@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         const response = await fetch('semantic.json');
+        if (!response.ok) {
+            throw new Error('Ağ hatası');
+        }
         dictionaryData = await response.json();
 
         const wordCount = Object.keys(dictionaryData).length;
@@ -19,10 +22,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Sözlük yüklenirken bir hata oluştu:', error);
         hasError = true;
 
-        // Remove existing content and display error message
+        // Hata mesajını göster
         wordCountElement.innerHTML = `<p class="error-message">Dilin kökenleri kimileyin sessiz kalmayı yeğler.</p>`;
 
-        // Hide other elements
+        // Diğer elemanları gizle
         searchContainer.classList.add('error'); 
         resultDiv.classList.add('hidden'); 
         ghostText.classList.add('hidden'); 
@@ -62,12 +65,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         filteredWords.forEach(word => {
             const wordDetails = dictionaryData[word];
             const description = wordDetails.description.replace(/<br>/g, "");
-            resultDiv.innerHTML += 
-                `<p class="description">${highlightWords(sanitizeHTML(description))}</p>`;
+            const descriptionElement = document.createElement('p');
+            descriptionElement.classList.add('description');
+            descriptionElement.innerHTML = highlightWords(sanitizeHTML(description));
+            resultDiv.appendChild(descriptionElement);
+
+            // Metnin yüksekliğini ölç ve kapsayıcının yüksekliğini ayarla
+            const descriptionHeight = descriptionElement.offsetHeight;
+            descriptionElement.style.maxHeight = `${descriptionHeight}px`; 
         });
 
         resultDiv.style.animation = 'none';
-        resultDiv.offsetHeight;
+        resultDiv.offsetHeight; // Reflow trigger
         resultDiv.style.animation = 'fadeIn 1s ease-in-out';
         searchContainer.classList.remove('error'); 
     }
@@ -102,12 +111,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             '15': 'Çuvaş Türkçesi'
         };
 
+        // Metni işaretleyici bir etiket ile geçici olarak değiştir
+        let markedText = text;
         for (const [key, value] of Object.entries(specialWords)) {
-            const regex = new RegExp(`\\b${key}\\b(\\s+\\w+)`, 'gi');
-            text = text.replace(regex, `<b>${value}</b> <i>$1</i>`);
+            const regex = new RegExp(`\\b${key}\\b`, 'gi');
+            markedText = markedText.replace(regex, (match) => `[SPECIAL:${key}]`);
         }
 
-        return text;
+        // Özel kelimeler işaretlendikten sonra, bir harfle birleşik olanları da dahil ederek ilk gelen kelimeyi italik yap
+        let resultText = markedText;
+        for (const [key, value] of Object.entries(specialWords)) {
+            const regex = new RegExp(`\\[SPECIAL:${key}\\](\\W+)(\\S+)`, 'gi');
+            resultText = resultText.replace(regex, (match, p1, p2) => `<b>${value}</b>${p1}<i>${p2}</i>`);
+        }
+
+        // Geçici işaretleyici etiketleri kaldır
+        resultText = resultText.replace(/\[SPECIAL:\w+\]/g, '');
+
+        return resultText;
     }
 
     function updateSearchBoxPlaceholder(query) {
